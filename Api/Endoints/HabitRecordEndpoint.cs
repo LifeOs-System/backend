@@ -2,6 +2,7 @@
 using Application.Services.HabitRecords.Create;
 
 
+
 namespace Api.Endoints;
 
 public static class HabitRecordEndpoint
@@ -18,6 +19,13 @@ public static class HabitRecordEndpoint
                 return Results.BadRequest(result);
 
             return Results.Ok();
+        });
+
+        app.MapGet("/api/habits/last-week", async (IHabitRecordService habitRecordService) =>
+        {
+            var result = await habitRecordService.GetLastWeekSummaryAsync();
+
+            return Results.Ok(result);
         });
     }
 }

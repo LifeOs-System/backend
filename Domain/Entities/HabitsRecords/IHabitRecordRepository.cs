@@ -4,4 +4,6 @@ public interface IHabitRecordRepository
 {
     Task<HabitRecord?> GetHabitRecordByHabit(Guid habitId , DateOnly? date = null);
     Task UpdateAsync(HabitRecord record);
+    Task<List<HabitRecord>> GetHabitRecordsLastWeek();
+    Task <List<HabitRecord>> GetHabitRecordsPreviousWeek();
 }
