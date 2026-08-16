@@ -253,3 +253,5 @@ C:\Users\Administrator\Documents\WorkSpace\lifeos\backend\Api\obj\Debug\net10.0\
 C:\Users\Administrator\Documents\WorkSpace\lifeos\backend\Api\obj\Debug\net10.0\Api.pdb
 C:\Users\Administrator\Documents\WorkSpace\lifeos\backend\Api\obj\Debug\net10.0\Api.genruntimeconfig.cache
 C:\Users\Administrator\Documents\WorkSpace\lifeos\backend\Api\obj\Debug\net10.0\ref\Api.dll
+C:\Users\Administrator\Documents\WorkSpace\lifeos\backend\Api\obj\Debug\net10.0\Api.sourcelink.json
+C:\Users\Administrator\Documents\WorkSpace\lifeos\backend\Api\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
