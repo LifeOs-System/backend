@@ -1,7 +1,7 @@
 ﻿using Application.Services.Habits;
 using Application.Services.Habits.Create;
 
-namespace Api.Endoints;
+namespace Api.Endpoints;
 
 public static class HabitEndpoints
 {

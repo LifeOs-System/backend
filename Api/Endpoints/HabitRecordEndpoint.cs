@@ -20,12 +20,5 @@ public static class HabitRecordEndpoint
 
             return Results.Ok();
         });
-
-        app.MapGet("/api/habits/last-week", async (IHabitRecordService habitRecordService) =>
-        {
-            var result = await habitRecordService.GetLastWeekSummaryAsync();
-
-            return Results.Ok(result);
-        });
     }
 }

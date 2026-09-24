@@ -2,15 +2,18 @@
 using Application.Services.Habits.GetAll;
 using Application.Services.Habits.GetToday;
 using Domain.Entities.Habits;
+using Domain.Entities.HabitsRecords;
 
 namespace Application.Services.Habits;
 
 public class HabitService : IHabitService
 {
     private readonly IHabitRepository _habitRepository;
-    public HabitService(IHabitRepository habitRepository)
+    private readonly IHabitRecordRepository _habitRecordRepository;
+    public HabitService(IHabitRepository habitRepository, IHabitRecordRepository habitRecordRepository)
     {
         _habitRepository = habitRepository;
+        _habitRecordRepository = habitRecordRepository;
     }
 
     public async Task CreateAsync(CreateHabitRequest request)
@@ -21,6 +24,8 @@ public class HabitService : IHabitService
             Name = request.Name,
             Type = request.Type,
             Area = request.Area,
+            Frequency = request.Frequency.Value,
+            Occurrences = request.Occurrences,
             Target = request.Target,
             Unit = request.Unit,
             Days = request.Days.ToList()
@@ -33,22 +38,20 @@ public class HabitService : IHabitService
     public async Task<List<HabitResponse>> GetAllAsync()
     {
         var habits = await _habitRepository.GetAllAsync();
+        var responses = new List<HabitResponse>();
 
-        return habits.Select(habit =>
+        // Usamos foreach para que las consultas se ejecuten una por una (secuencialmente)
+        foreach (var habit in habits)
         {
-            // Días transcurridos desde el inicio (incluyendo el día de inicio, siempre ≥ 1)
-            var totalDays = habit.StartDate.HasValue
-                ? (DateTime.UtcNow.DayOfYear - habit.StartDate.Value.DayOfYear) + 1
-                : 0;
+            var habitRecords = await _habitRecordRepository.GetHabitRecordsByHabit(habit.Id);
+            var totalDays = habitRecords.Count;
+            var completedDays = habitRecords.Count(r => r.IsCompleted);
 
-            var completedDays = habit.Records.Count(r => r.IsCompleted);
-
-            // % de cumplimiento, acotado a 0–100 y sin división por cero
             var completionRate = totalDays > 0
-                ? Math.Min(100, Math.Round((decimal)completedDays * 100 / totalDays, 1))
-                : (completedDays > 0 ? 100 : 0);
+                ? Math.Min(100m, Math.Round((decimal)completedDays * 100 / totalDays, 1))
+                : 0m;
 
-            return new HabitResponse
+            responses.Add(new HabitResponse
             {
                 Id = habit.Id.ToString(),
                 Name = habit.Name,
@@ -61,41 +64,77 @@ public class HabitService : IHabitService
                 Days = habit.Days.ToList(),
                 TotalDays = totalDays,
                 CompletedDays = completedDays,
-                CompletionRate = completionRate
-            };
-        }).ToList();
+                CompletionRate = completionRate,
+                Frequency = habit.Frequency,
+                Occurrences = habit.Occurrences
+            });
+        }
+
+        return responses;
     }
+
     public async Task<List<HabitTodayResponse>> GetHabitsTodayAsync()
     {
-        // Usa la MISMA fuente de "hoy" para todo
         var today = DateTime.Today;
         var todayDate = DateOnly.FromDateTime(today);
+        var currentDayOfWeek = today.DayOfWeek;
 
-        var habits = await _habitRepository.GetHabitsByDayOfWeekAsync(today.DayOfWeek);
+        var habits = await _habitRepository.GetHabitsForTodayAsync(todayDate, currentDayOfWeek);
 
         var habitsResponse = new List<HabitTodayResponse>();
 
         foreach (var habit in habits)
         {
-            var r = new HabitTodayResponse
+            var recordToday = habit.Records.FirstOrDefault(hr => hr.Date == todayDate);
+
+            var response = new HabitTodayResponse
             {
-                Area = habit.Area,
                 Id = habit.Id.ToString(),
                 Name = habit.Name,
                 Type = habit.Type,
+                Area = habit.Area,
                 Target = habit.Target,
-                Unit = habit.Unit
+                Unit = habit.Unit,
+                IsCompleted = recordToday?.IsCompleted ?? false,
+                Value = habit.Type != HabitType.Binary ? (recordToday?.Value ?? 0m) : null,
+                Frequency = habit.Frequency
             };
 
-            var recordToday = habit.Records.FirstOrDefault(hr => hr.Date == todayDate);
+            // ✅ LÓGICA CONDICIONAL: Solo calcular si tiene Frecuencia y Ocurrencias definidas
+            if (habit.Frequency != null && habit.Occurrences != null)
+            {
+                response.Occurrences = habit.Occurrences;
 
-            // Sin "!" : si no hay registro, devuelves valores por defecto
-            r.IsCompleted = recordToday?.IsCompleted ?? false;
+                // Calcular el rango de fechas exacto para el conteo
+                DateOnly startDate;
+                DateOnly endDate;
 
-            if (habit.Type != HabitType.Binary)
-                r.Value = recordToday?.Value ?? 0;
+                if (habit.Frequency == HabitFrequency.Weekly)
+                {
+                    // Rango: Lunes a Domingo de la semana actual
+                    int daysToMonday = currentDayOfWeek == DayOfWeek.Sunday ? 6 : (int)currentDayOfWeek - 1;
+                    startDate = todayDate.AddDays(-daysToMonday);
+                    endDate = startDate.AddDays(6);
+                }
+                else // Monthly
+                {
+                    // Rango: Día 1 al último día del mes actual
+                    startDate = new DateOnly(today.Year, today.Month, 1);
+                    endDate = startDate.AddMonths(1).AddDays(-1);
+                }
 
-            habitsResponse.Add(r);
+                // Contar SOLO los registros completados dentro de ese rango
+                response.CompletedOccurrences = habit.Records.Count(r =>
+                    r.Date >= startDate && r.Date <= endDate && r.IsCompleted);
+            }
+            else
+            {
+                // Si es un hábito de días específicos, estos campos son irrelevantes (null)
+                response.Occurrences = null;
+                response.CompletedOccurrences = null;
+            }
+
+            habitsResponse.Add(response);
         }
 
         return habitsResponse;

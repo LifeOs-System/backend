@@ -1,9 +1,12 @@
 using Api.Endoints;
+using Api.Endpoints;
 using Application.Services.Background;
 using Application.Services.HabitRecords;
 using Application.Services.Habits;
+using Application.Services.ToDoTasks;
 using Domain.Entities.Habits;
 using Domain.Entities.HabitsRecords;
+using Domain.Entities.ToDoTask;
 using Infrastructure;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -41,13 +44,16 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 // Repositories
 builder.Services.AddScoped<IHabitRepository, HabitRepository>();
 builder.Services.AddScoped<IHabitRecordRepository, HabitRecordRepository>();
+builder.Services.AddScoped<IToDoTaskRepository, ToDoTaskRepository>();
 
 // Services
 builder.Services.AddScoped<IHabitService, HabitService>();
 builder.Services.AddScoped<IHabitRecordService, HabitRecordService>();
+builder.Services.AddScoped<IToDoTaskService, ToDoTaskService>();
 
 //Background Services
 builder.Services.AddHostedService<HabitRecordCreationService>();
+builder.Services.AddHostedService<HabitRecordCleanupService>();
 
 var app = builder.Build();
 
@@ -55,5 +61,6 @@ app.UseCors("AllowAll");
 // Endpoints
 HabitEndpoints.Map(app);
 HabitRecordEndpoint.Map(app);
+TaskEndpoint.Map(app);
 
 app.Run();

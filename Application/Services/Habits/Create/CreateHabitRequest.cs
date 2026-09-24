@@ -9,6 +9,9 @@ public class CreateHabitRequest
     // Para time / quantity
     public decimal? Target { get; set; }
 
+    public HabitFrequency? Frequency { get; set; }
+    public int? Occurrences { get; set; }
+
     // "min", "g", "km", etc.
     public string? Unit { get; set; }
 

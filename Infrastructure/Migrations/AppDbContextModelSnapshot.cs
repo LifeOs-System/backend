@@ -35,9 +35,15 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("integer[]");
 
+                    b.Property<int?>("Frequency")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int?>("Occurrences")
+                        .HasColumnType("integer");
 
                     b.Property<DateOnly?>("StartDate")
                         .HasColumnType("date");
@@ -87,7 +93,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("HabitRecords");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Tasks.Task", b =>
+            modelBuilder.Entity("Domain.Entities.ToDoTask.ToDoTask", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()

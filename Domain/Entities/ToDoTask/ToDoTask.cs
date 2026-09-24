@@ -1,6 +1,6 @@
-﻿namespace Domain.Entities.Tasks;
+﻿namespace Domain.Entities.ToDoTask;
 
-public class Task
+public class ToDoTask
 {
     public Guid Id { get; set; }
     public required string Name { get; set; }

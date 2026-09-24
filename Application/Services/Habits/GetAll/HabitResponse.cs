@@ -16,4 +16,6 @@ public class HabitResponse
     public required int TotalDays { get; set; }
     public required int CompletedDays { get; set; }
     public required decimal CompletionRate { get; set; }
+    public HabitFrequency? Frequency { get; set; }
+    public int? Occurrences { get; set; }
 }

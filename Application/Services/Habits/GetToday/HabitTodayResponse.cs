@@ -11,6 +11,9 @@ public class HabitTodayResponse
     public decimal? Target { get; set; }
     public decimal? Value { get; set; }
     public string? Unit { get; set; }
-    public bool? IsCompleted { get; set;  }
+    public bool? IsCompleted { get; set; }
     public required Area Area { get; set; }
+    public HabitFrequency? Frequency { get; set; }
+    public int? Occurrences { get; set; }
+    public int? CompletedOccurrences { get; set; }
 }

@@ -1,8 +1,8 @@
 ﻿using Domain.Entities.Habits;
 using Domain.Entities.HabitsRecords;
+using Domain.Entities.ToDoTask;
 using Microsoft.EntityFrameworkCore;
 
-using Task = Domain.Entities.Tasks.Task;
 
 namespace Infrastructure;
 
@@ -15,6 +15,5 @@ public class AppDbContext : DbContext
 
     public DbSet<Habit> Habits => Set<Habit>();
     public DbSet<HabitRecord> HabitRecords => Set<HabitRecord>();
-    public DbSet<Task> Tasks => Set<Task>();
-
+    public DbSet<ToDoTask> Tasks => Set<ToDoTask>();
 }
