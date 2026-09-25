@@ -1,9 +1,11 @@
 using Api.Endoints;
 using Api.Endpoints;
 using Application.Services.Background;
+using Application.Services.Books;
 using Application.Services.HabitRecords;
 using Application.Services.Habits;
 using Application.Services.ToDoTasks;
+using Domain.Entities.Books;
 using Domain.Entities.Habits;
 using Domain.Entities.HabitsRecords;
 using Domain.Entities.ToDoTask;
@@ -45,11 +47,13 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddScoped<IHabitRepository, HabitRepository>();
 builder.Services.AddScoped<IHabitRecordRepository, HabitRecordRepository>();
 builder.Services.AddScoped<IToDoTaskRepository, ToDoTaskRepository>();
+builder.Services.AddScoped<IBookRepository, BookRepository>();
 
 // Services
 builder.Services.AddScoped<IHabitService, HabitService>();
 builder.Services.AddScoped<IHabitRecordService, HabitRecordService>();
 builder.Services.AddScoped<IToDoTaskService, ToDoTaskService>();
+builder.Services.AddScoped<IBookService, BookService>();
 
 //Background Services
 builder.Services.AddHostedService<HabitRecordCreationService>();
@@ -62,5 +66,6 @@ app.UseCors("AllowAll");
 HabitEndpoints.Map(app);
 HabitRecordEndpoint.Map(app);
 TaskEndpoint.Map(app);
+BookEndpoint.Map(app);
 
 app.Run();
