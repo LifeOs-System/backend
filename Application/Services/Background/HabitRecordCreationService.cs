@@ -129,4 +129,51 @@ public class HabitRecordCreationService : BackgroundService
         // 3. Si no tiene días ni frecuencia configurada, no se crea automáticamente
         return false;
     }
+
+    public async Task CreateRecordForNewHabitAsync(Guid habitId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Creamos un scope para obtener el DbContext de forma segura
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var habit = await context.Habits.FindAsync(new object[] { habitId }, cancellationToken);
+            if (habit == null) return;
+
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+            // 1. Reutilizamos tu lógica existente para saber si aplica hoy
+            if (!ShouldCreateForDay(habit, today.DayOfWeek))
+            {
+                return;
+            }
+
+            // 2. Verificamos que no exista ya (por seguridad)
+            var exists = await context.HabitRecords
+                .AnyAsync(hr => hr.HabitId == habitId && hr.Date == today, cancellationToken);
+
+            if (exists) return;
+
+            // 3. Creamos el registro
+            var newRecord = new HabitRecord
+            {
+                Id = Guid.NewGuid(),
+                HabitId = habit.Id,
+                Date = today,
+                Value = null,
+                Target = habit.Type != HabitType.Binary ? habit.Target : null,
+                IsCompleted = false
+            };
+
+            context.HabitRecords.Add(newRecord);
+            await context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("✅ Creado HabitRecord inmediato para el hábito {HabitId}", habitId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al crear HabitRecord inmediato para el hábito {HabitId}", habitId);
+        }
+    }
 }

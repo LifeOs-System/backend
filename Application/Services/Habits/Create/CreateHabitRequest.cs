@@ -9,7 +9,7 @@ public class CreateHabitRequest
     // Para time / quantity
     public decimal? Target { get; set; }
 
-    public HabitFrequency? Frequency { get; set; }
+    public HabitFrequency? Frequency { get; set; } = null;
     public int? Occurrences { get; set; }
 
     // "min", "g", "km", etc.

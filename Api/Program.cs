@@ -55,8 +55,11 @@ builder.Services.AddScoped<IHabitRecordService, HabitRecordService>();
 builder.Services.AddScoped<IToDoTaskService, ToDoTaskService>();
 builder.Services.AddScoped<IBookService, BookService>();
 
-//Background Services
-builder.Services.AddHostedService<HabitRecordCreationService>();
+// 1. Registra la clase concreta como Singleton para que HabitService pueda inyectarla
+builder.Services.AddSingleton<HabitRecordCreationService>();
+
+// 2. Registra el BackgroundService usando esa misma instancia (no crea una nueva)
+builder.Services.AddHostedService(sp => sp.GetRequiredService<HabitRecordCreationService>());
 builder.Services.AddHostedService<HabitRecordCleanupService>();
 
 var app = builder.Build();

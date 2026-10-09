@@ -1,4 +1,5 @@
-﻿using Application.Services.Habits.Create;
+﻿using Application.Services.Background;
+using Application.Services.Habits.Create;
 using Application.Services.Habits.GetAll;
 using Application.Services.Habits.GetToday;
 using Domain.Entities.Habits;
@@ -10,10 +11,15 @@ public class HabitService : IHabitService
 {
     private readonly IHabitRepository _habitRepository;
     private readonly IHabitRecordRepository _habitRecordRepository;
-    public HabitService(IHabitRepository habitRepository, IHabitRecordRepository habitRecordRepository)
+    private readonly HabitRecordCreationService _habitRecordCreationService;
+
+    public HabitService(IHabitRepository habitRepository,
+        IHabitRecordRepository habitRecordRepository,
+        HabitRecordCreationService habitRecordCreationService)
     {
         _habitRepository = habitRepository;
         _habitRecordRepository = habitRecordRepository;
+        _habitRecordCreationService = habitRecordCreationService;
     }
 
     public async Task CreateAsync(CreateHabitRequest request)
@@ -24,15 +30,17 @@ public class HabitService : IHabitService
             Name = request.Name,
             Type = request.Type,
             Area = request.Area,
-            Frequency = request.Frequency.Value,
+            Frequency = request.Frequency,
             Occurrences = request.Occurrences,
             Target = request.Target,
             Unit = request.Unit,
-            Days = request.Days.ToList()
+            Days = request.Days?.ToList() ?? []
         };
 
+
         await _habitRepository.CreateAsync(habit);
-        await Task.CompletedTask;
+
+        await _habitRecordCreationService.CreateRecordForNewHabitAsync(habit.Id);
     }
 
     public async Task<List<HabitResponse>> GetAllAsync()
