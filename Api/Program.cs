@@ -64,6 +64,28 @@ builder.Services.AddHostedService<HabitRecordCleanupService>();
 
 var app = builder.Build();
 
+# region Aplicar Migraciones de Base de Datos al Iniciar la Aplicación
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+
+        await context.Database.MigrateAsync();
+
+        logger.LogInformation("Migraciones de base de datos aplicadas correctamente.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Ocurrió un error al aplicar las migraciones de la base de datos.");
+        throw; 
+    }
+}
+#endregion
+
 app.UseCors("AllowAll");
 // Endpoints
 HabitEndpoints.Map(app);
