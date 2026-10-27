@@ -29,5 +29,12 @@ public static class HabitEndpoints
             var habits = await habitService.GetHabitsTodayAsync();
             return Results.Ok(habits);
         });
+
+        app.MapGet("/api/habits/last30days", async (
+            IHabitService habitService) =>
+        {
+            var habits = await habitService.GetLast30DaysAsync();
+            return Results.Ok(habits);
+        });
     }
 }

@@ -13,9 +13,6 @@ public class HabitResponse
     public string? Unit { get; set; }
     public required Area Area { get; set; }
     public List<DayOfWeek> Days { get; set; } = new List<DayOfWeek>();
-    public required int TotalDays { get; set; }
-    public required int CompletedDays { get; set; }
-    public required decimal CompletionRate { get; set; }
     public HabitFrequency? Frequency { get; set; }
     public int? Occurrences { get; set; }
 }

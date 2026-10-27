@@ -1,6 +1,7 @@
 ﻿using Application.Services.Background;
 using Application.Services.Habits.Create;
 using Application.Services.Habits.GetAll;
+using Application.Services.Habits.GetLast30DaysAsync;
 using Application.Services.Habits.GetToday;
 using Domain.Entities.Habits;
 using Domain.Entities.HabitsRecords;
@@ -52,12 +53,6 @@ public class HabitService : IHabitService
         foreach (var habit in habits)
         {
             var habitRecords = await _habitRecordRepository.GetHabitRecordsByHabit(habit.Id);
-            var totalDays = habitRecords.Count;
-            var completedDays = habitRecords.Count(r => r.IsCompleted);
-
-            var completionRate = totalDays > 0
-                ? Math.Min(100m, Math.Round((decimal)completedDays * 100 / totalDays, 1))
-                : 0m;
 
             responses.Add(new HabitResponse
             {
@@ -70,9 +65,6 @@ public class HabitService : IHabitService
                 Unit = habit.Unit,
                 Area = habit.Area,
                 Days = habit.Days.ToList(),
-                TotalDays = totalDays,
-                CompletedDays = completedDays,
-                CompletionRate = completionRate,
                 Frequency = habit.Frequency,
                 Occurrences = habit.Occurrences
             });
@@ -147,4 +139,53 @@ public class HabitService : IHabitService
 
         return habitsResponse;
     }
+
+
+    public async Task<GetLast30DaysResponse> GetLast30DaysAsync()
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var startDate = today.AddDays(-30);
+        var endDate = today;
+
+        var habits = await _habitRepository.GetAllAsync();
+        var response = new GetLast30DaysResponse();
+
+        foreach (var habit in habits)
+        {
+            var records = await _habitRecordRepository
+                .GetHabitRecordsByHabit(habit.Id);
+
+            var recordsInPeriod = records
+                .Where(record =>
+                    record.Date >= startDate &&
+                    record.Date < endDate)
+                .OrderBy(record => record.Date)
+                .Select(record => new Last30DaysHabitRecordResponse
+                {
+                    Date = record.Date,
+                    Value = record.Value,
+                    Target = record.Target,
+                    IsCompleted = record.IsCompleted
+                })
+                .ToList();
+
+            response.Habits.Add(new Last30DaysHabitResponse
+            {
+                Name = habit.Name,
+                Type = habit.Type,
+                Status = habit.Status,
+                StartDate = habit.StartDate,
+                Target = habit.Target,
+                Unit = habit.Unit,
+                Area = habit.Area,
+                Days = habit.Days.ToList(),
+                Frequency = habit.Frequency,
+                Occurrences = habit.Occurrences,
+                Records = recordsInPeriod
+            });
+        }
+
+        return response;
+    }
+
 }

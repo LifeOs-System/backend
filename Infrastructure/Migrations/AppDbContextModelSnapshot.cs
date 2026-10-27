@@ -56,6 +56,27 @@ namespace Infrastructure.Migrations
                     b.ToTable("Books");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Foods.FoodRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("CreatedAt")
+                        .HasColumnType("date");
+
+                    b.Property<string>("FoodsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("MealType")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FoodRecords");
+                });
+
             modelBuilder.Entity("Domain.Entities.Habits.Habit", b =>
                 {
                     b.Property<Guid>("Id")
@@ -148,6 +169,138 @@ namespace Infrastructure.Migrations
                     b.ToTable("Tasks");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Users.BodyMetrics", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Chest")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("Hips")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("LeftArm")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("LeftCalf")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("LeftForearm")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("LeftThigh")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Neck")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("RightArm")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("RightCalf")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("RightForearm")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("RightThigh")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Waist")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("BodyMetrics");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Users.ProgressPhoto", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ProgressPhotos");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Users.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Age")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("BMI")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateOnly>("BirthDay")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("BodyFatPercentage")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("Gender")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Height")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Weight")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Users.WeightRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Weight")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("WeightRecords");
+                });
+
             modelBuilder.Entity("Domain.Entities.HabitsRecords.HabitRecord", b =>
                 {
                     b.HasOne("Domain.Entities.Habits.Habit", "Habit")
@@ -159,9 +312,51 @@ namespace Infrastructure.Migrations
                     b.Navigation("Habit");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Users.BodyMetrics", b =>
+                {
+                    b.HasOne("Domain.Entities.Users.User", "User")
+                        .WithOne("BodyMetrics")
+                        .HasForeignKey("Domain.Entities.Users.BodyMetrics", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Users.ProgressPhoto", b =>
+                {
+                    b.HasOne("Domain.Entities.Users.User", "User")
+                        .WithMany("ProgressPhotos")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Users.WeightRecord", b =>
+                {
+                    b.HasOne("Domain.Entities.Users.User", "User")
+                        .WithMany("WeightRecords")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Domain.Entities.Habits.Habit", b =>
                 {
                     b.Navigation("Records");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Users.User", b =>
+                {
+                    b.Navigation("BodyMetrics");
+
+                    b.Navigation("ProgressPhotos");
+
+                    b.Navigation("WeightRecords");
                 });
 #pragma warning restore 612, 618
         }
